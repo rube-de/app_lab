@@ -12,7 +12,7 @@ import android.media.AudioManager;
 import android.widget.RemoteViews;
 
 /**
- * Created by becks on 15.07.14.
+ * Created by Bernhard Ruf on 15.07.14.
  */
 public class AppWidget extends AppWidgetProvider {
     @Override

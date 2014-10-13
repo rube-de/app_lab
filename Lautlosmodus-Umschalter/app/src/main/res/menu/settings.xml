@@ -1,12 +1,12 @@
+<!--
+  ~ Copyright (c) 2014.
+  -->
+
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context=".MainActivity" >
+    tools:context="de.becksr.lautlosmodus_umschalter.SettingsActivity" >
     <item android:id="@+id/action_settings"
         android:title="@string/action_settings"
         android:orderInCategory="100"
         android:showAsAction="never" />
-    <item android:id="@+id/action_about"
-        android:title="About"
-        android:orderInCategory="100"
-        android:showAsAction="never"/>
 </menu>
