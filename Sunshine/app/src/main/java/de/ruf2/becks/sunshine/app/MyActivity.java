@@ -1,16 +1,18 @@
 package de.ruf2.becks.sunshine.app;
 
-import android.support.v7.app.ActionBarActivity;
-import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.os.Build;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
+import java.util.ArrayList;
+import java.util.List;
 
 
 public class MyActivity extends ActionBarActivity {
@@ -58,6 +60,24 @@ public class MyActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_my, container, false);
+
+            List<String> fakeData = new ArrayList<String>();
+            fakeData.add("Today - Sunny - 25/15");
+            fakeData.add("Tomorrow - Cloudy - 21/16");
+            fakeData.add("Friday - Sunny - 22/15");
+            fakeData.add("Saturday - Cloudy 18/14");
+            fakeData.add("Sunday - Rainy - 17/12");
+            fakeData.add("Monday - Sunny - 23/15");
+
+            ArrayAdapter<String> listAdapter = new ArrayAdapter<String>(
+                    getActivity(),
+                    R.layout.list_item_forecast,
+                    R.id.list_item_forecast_texview,
+                    fakeData);
+
+            ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
+            listView.setAdapter(listAdapter);
+
             return rootView;
         }
     }
