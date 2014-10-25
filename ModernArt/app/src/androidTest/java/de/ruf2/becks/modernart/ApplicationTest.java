@@ -1,4 +1,4 @@
-package de.becksr.lautlosmodus_umschalter;
+package de.ruf2.becks.modernart;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

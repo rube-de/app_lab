@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">ModernArt</string>
+    <string name="action_settings">More information</string>
+    <string name="not_now">Not now</string>
+    <string name="visit_moma">Visit MOMA</string>
+    <string name="dialog_msg">"Inspired by the works of artists such as Piet Mondrian and Ben Nicholson.
+
+        Click below to learn more!"</string>
+</resources>
