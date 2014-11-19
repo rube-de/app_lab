@@ -6,5 +6,11 @@
         android:id="@+id/thumbnail"
         android:layout_width="160dp"
         android:layout_height="120dp"/>
+    <TextView
+        android:id="@+id/picture_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_toRightOf="@id/thumbnail"
+        android:padding="10dp"/>
 
 </RelativeLayout>

@@ -22,4 +22,12 @@ public class SelfieRecord {
     public void setPictureFile(File pictureFile) {
         this.pictureFile = pictureFile;
     }
+
+    public String getPictureName() {
+        return pictureName;
+    }
+
+    public void setPictureName(String pictureName) {
+        this.pictureName = pictureName;
+    }
 }
