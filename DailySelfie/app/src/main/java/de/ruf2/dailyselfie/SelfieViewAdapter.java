@@ -3,6 +3,7 @@ package de.ruf2.dailyselfie;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +11,16 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by becks on 19.11.2014.
  */
 public class SelfieViewAdapter extends BaseAdapter {
 
-    private ArrayList<SelfieRecord> mList =  new ArrayList<SelfieRecord>();
+    private ArrayList<SelfieRecord> list =  new ArrayList<SelfieRecord>();
     private static LayoutInflater inflater = null;
     private Context mContext;
 
@@ -25,17 +28,18 @@ public class SelfieViewAdapter extends BaseAdapter {
     private ImageView mImageView;
 
     public SelfieViewAdapter(Context mContext) {
+        inflater = LayoutInflater.from(mContext);
         this.mContext = mContext;
     }
 
     @Override
     public int getCount() {
-        return mList.size();
+        return list.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return mList.get(i);
+        return list.get(i);
     }
 
     @Override
@@ -51,7 +55,7 @@ public class SelfieViewAdapter extends BaseAdapter {
 
         if(newView == null){
             holder = new ViewHolder();
-            newView = inflater.inflate(R.layout.selfie_list_item, viewGroup);
+            newView = inflater.inflate(R.layout.selfie_list_item, null);
             holder.picture = (ImageView) newView.findViewById(R.id.thumbnail);
             holder.name = (TextView) newView.findViewById(R.id.picture_name);
             newView.setTag(holder);
@@ -59,11 +63,13 @@ public class SelfieViewAdapter extends BaseAdapter {
             holder = (ViewHolder) newView.getTag();
         }
 
-        SelfieRecord curr = mList.get(i);
-        mCurrentPhotoPath = curr.getPictureFile().getAbsolutePath();
-        holder.picture = mImageView;
-        holder.name.setText(curr.getPictureName());
-
+        SelfieRecord curr = list.get(i);
+        mCurrentPhotoPath = curr.getPictureUri().getPath();
+//        mCurrentPhotoPath = curr.getPictureFile().getAbsolutePath();
+        mImageView = holder.picture;
+        setPic();
+        holder.name.setText(curr.getPictureUri().getLastPathSegment());
+//        holder.name.setText(curr.getPictureFile().getName());
         return newView;
     }
 
@@ -73,10 +79,44 @@ public class SelfieViewAdapter extends BaseAdapter {
         TextView name;
     }
 
+    public void addAllViews(File storageDirectory){
+        removeAllViews();
+        List<SelfieRecord> records = new ArrayList<SelfieRecord>();
+        if(storageDirectory.listFiles() != null){
+                for(File f : storageDirectory.listFiles()) {
+//                    SelfieRecord rec = new SelfieRecord(f);
+                    SelfieRecord rec = new SelfieRecord(Uri.fromFile(f));
+                    add(rec);
+                    records.add(rec);
+                }
+        }
+    }
+
+    private List<SelfieRecord> getRecords(File storageDirectory) {
+        List<SelfieRecord> records = new ArrayList<SelfieRecord>();
+        for(File f : storageDirectory.listFiles()){
+            SelfieRecord rec = new SelfieRecord(f, f.getName());
+            add(rec);
+            records.add(rec);
+        }
+        return records;
+
+    }
+
+    public void add(SelfieRecord listItem) {
+        list.add(listItem);
+        notifyDataSetChanged();
+    }
+
+    public void removeAllViews(){
+        list.clear();
+        this.notifyDataSetChanged();
+    }
+
     private void setPic() {
         // Get the dimensions of the View
-        int targetW = mImageView.getWidth();
-        int targetH = mImageView.getHeight();
+        int targetW = 160;//mImageView.getWidth();
+        int targetH = 120;//mImageView.getHeight();
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();

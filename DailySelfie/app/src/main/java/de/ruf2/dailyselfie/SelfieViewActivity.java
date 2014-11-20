@@ -9,6 +9,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
@@ -23,16 +25,39 @@ public class SelfieViewActivity extends ListActivity {
 
     private SelfieViewAdapter mAdapter;
     private String mCurrentPhotoPath;
+    private String STORAGE_PATH = Environment.getExternalStoragePublicDirectory(
+            Environment.DIRECTORY_PICTURES) + File.separator + "DailySelfie";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 //        setContentView(R.layout.activity_selfie_overview);
-        final ListView selfiesListView = getListView();
+        final ListView listView = getListView();
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Log.i(TAG, "click on list item");
+//                Toast.makeText(getApplicationContext(), "Galleyview not implemented", Toast.LENGTH_LONG).show();
+                Object item = mAdapter.getItem(position);
+                if(item instanceof SelfieRecord) {
+                    Intent intent = new Intent();
+                    intent.setAction(Intent.ACTION_VIEW);
+                    intent.setDataAndType(((SelfieRecord) item).getPictureUri(), "image/*");
+                    startActivity(intent);
+                }
+            }
+        });
 
         mAdapter = new SelfieViewAdapter(getApplicationContext());
+//        mAdapter.addAllViews(new File(STORAGE_PATH));
         setListAdapter(mAdapter) ;
 
+    }
+
+    @Override
+    protected void onResume(){
+        super.onResume();
+        mAdapter.addAllViews(new File(STORAGE_PATH));
     }
 
 
@@ -50,14 +75,38 @@ public class SelfieViewActivity extends ListActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         switch(id){
-            case R.id.action_settings:
-                return true;
+//            case R.id.action_settings:
+//                return true;
             case R.id.action_camera:
                 Log.i(TAG, "Action Camera clicked");
                 dispatchTakePictureIntent();
                 return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.i(TAG,"Entered onActivityResult()");
+
+        // TODO - Check result code and request code
+        // if user took pic
+        // Create a new pic from the data Intent
+        // and then add it to the adapter
+        if (requestCode == REQUEST_TAKE_PHOTO) {
+            if (resultCode == RESULT_OK) {
+                galleryAddPic();
+                File f = new File(mCurrentPhotoPath);
+                Uri contentUri = Uri.fromFile(f);
+                SelfieRecord record = new SelfieRecord(contentUri);
+
+//                Bundle extras = data.getExtras();
+//                Bitmap imageBitmap = (Bitmap) extras.get("data");
+//                mImageView.setImageBitmap(imageBitmap);
+                Log.i(TAG, "add new Selfie");
+                mAdapter.add(record);
+            }
+        }
     }
 
     private void dispatchTakePictureIntent() {
@@ -71,7 +120,7 @@ public class SelfieViewActivity extends ListActivity {
             } catch (IOException ex) {
                 // Error occurred while creating the File
                 Log.i(TAG, "Could not take Picture");
-                Toast.makeText(getApplicationContext(), "Could take photo", Toast.LENGTH_LONG);
+                Toast.makeText(getApplicationContext(), "Could not take photo", Toast.LENGTH_LONG).show();
             }
             // Continue only if the File was successfully created
             if (photoFile != null) {
@@ -86,8 +135,9 @@ public class SelfieViewActivity extends ListActivity {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
         String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = Environment.getExternalStoragePublicDirectory(
-                Environment.DIRECTORY_PICTURES);
+        File storageDir = new File(STORAGE_PATH);
+        storageDir.mkdir();
+        Log.i(TAG,"storageDir: " + storageDir);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -97,5 +147,13 @@ public class SelfieViewActivity extends ListActivity {
         // Save a file: path for use with ACTION_VIEW intents
         mCurrentPhotoPath = "file:" + image.getAbsolutePath();
         return image;
+    }
+
+    private void galleryAddPic() {
+        Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+        File f = new File(mCurrentPhotoPath);
+        Uri contentUri = Uri.fromFile(f);
+        mediaScanIntent.setData(contentUri);
+        this.sendBroadcast(mediaScanIntent);
     }
 }
