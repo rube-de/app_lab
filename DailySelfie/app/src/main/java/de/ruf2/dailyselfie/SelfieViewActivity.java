@@ -1,6 +1,8 @@
 package de.ruf2.dailyselfie;
 
+import android.app.AlertDialog;
 import android.app.ListActivity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -28,10 +30,12 @@ public class SelfieViewActivity extends ListActivity {
     private String STORAGE_PATH = Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES) + File.separator + "DailySelfie";
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_selfie_overview);
+
+
         final ListView listView = getListView();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -39,7 +43,7 @@ public class SelfieViewActivity extends ListActivity {
                 Log.i(TAG, "click on list item");
 //                Toast.makeText(getApplicationContext(), "Galleyview not implemented", Toast.LENGTH_LONG).show();
                 Object item = mAdapter.getItem(position);
-                if(item instanceof SelfieRecord) {
+                if (item instanceof SelfieRecord) {
                     Intent intent = new Intent();
                     intent.setAction(Intent.ACTION_VIEW);
                     intent.setDataAndType(((SelfieRecord) item).getPictureUri(), "image/*");
@@ -50,12 +54,12 @@ public class SelfieViewActivity extends ListActivity {
 
         mAdapter = new SelfieViewAdapter(getApplicationContext());
 //        mAdapter.addAllViews(new File(STORAGE_PATH));
-        setListAdapter(mAdapter) ;
+        setListAdapter(mAdapter);
 
     }
 
     @Override
-    protected void onResume(){
+    protected void onResume() {
         super.onResume();
         mAdapter.addAllViews(new File(STORAGE_PATH));
     }
@@ -74,22 +78,29 @@ public class SelfieViewActivity extends ListActivity {
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        switch(id){
-//            case R.id.action_settings:
-//                return true;
+        switch (id) {
+            case R.id.action_settings:
+                Intent settings = new Intent(SelfieViewActivity.this, SettingsActivity.class);
+                startActivity(settings);
+                return true;
             case R.id.action_camera:
                 Log.i(TAG, "Action Camera clicked");
                 dispatchTakePictureIntent();
                 return true;
+            case R.id.action_delete:
+                Log.i(TAG, "Delete Selfies");
+                deleteAllSelfies();
+                return true;
+
         }
         return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.i(TAG,"Entered onActivityResult()");
+        Log.i(TAG, "Entered onActivityResult()");
 
-        // TODO - Check result code and request code
+        // - Check result code and request code
         // if user took pic
         // Create a new pic from the data Intent
         // and then add it to the adapter
@@ -105,6 +116,12 @@ public class SelfieViewActivity extends ListActivity {
 //                mImageView.setImageBitmap(imageBitmap);
                 Log.i(TAG, "add new Selfie");
                 mAdapter.add(record);
+            } else {
+                File f = new File(mCurrentPhotoPath);
+                boolean e = f.exists();
+                boolean d = f.delete();
+                Log.i(TAG, "Temp file: " + mCurrentPhotoPath + " - is delete " + d);
+
             }
         }
     }
@@ -137,7 +154,7 @@ public class SelfieViewActivity extends ListActivity {
         String imageFileName = "JPEG_" + timeStamp + "_";
         File storageDir = new File(STORAGE_PATH);
         storageDir.mkdir();
-        Log.i(TAG,"storageDir: " + storageDir);
+        Log.i(TAG, "storageDir: " + storageDir);
         File image = File.createTempFile(
                 imageFileName,  /* prefix */
                 ".jpg",         /* suffix */
@@ -145,7 +162,8 @@ public class SelfieViewActivity extends ListActivity {
         );
 
         // Save a file: path for use with ACTION_VIEW intents
-        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+//        mCurrentPhotoPath = "file:" + image.getAbsolutePath();
+        mCurrentPhotoPath = image.getAbsolutePath();
         return image;
     }
 
@@ -155,5 +173,26 @@ public class SelfieViewActivity extends ListActivity {
         Uri contentUri = Uri.fromFile(f);
         mediaScanIntent.setData(contentUri);
         this.sendBroadcast(mediaScanIntent);
+    }
+
+    private void deleteAllSelfies() {
+        AlertDialog builder = new AlertDialog.Builder(this)
+                .setMessage(R.string.delete_msg)
+                .setPositiveButton(R.string.action_delete, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        File dir = new File(STORAGE_PATH);
+                        for (File file : dir.listFiles()) {
+                            file.delete();
+                        }
+                        mAdapter.addAllViews(new File(STORAGE_PATH));
+                    }
+                })
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        // do nothing
+                    }
+                })
+                .setIcon(android.R.drawable.ic_delete)
+                .show();
     }
 }

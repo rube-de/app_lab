@@ -65,11 +65,9 @@ public class SelfieViewAdapter extends BaseAdapter {
 
         SelfieRecord curr = list.get(i);
         mCurrentPhotoPath = curr.getPictureUri().getPath();
-//        mCurrentPhotoPath = curr.getPictureFile().getAbsolutePath();
         mImageView = holder.picture;
         setPic();
         holder.name.setText(curr.getPictureUri().getLastPathSegment());
-//        holder.name.setText(curr.getPictureFile().getName());
         return newView;
     }
 
@@ -84,7 +82,6 @@ public class SelfieViewAdapter extends BaseAdapter {
         List<SelfieRecord> records = new ArrayList<SelfieRecord>();
         if(storageDirectory.listFiles() != null){
                 for(File f : storageDirectory.listFiles()) {
-//                    SelfieRecord rec = new SelfieRecord(f);
                     SelfieRecord rec = new SelfieRecord(Uri.fromFile(f));
                     add(rec);
                     records.add(rec);
@@ -115,6 +112,7 @@ public class SelfieViewAdapter extends BaseAdapter {
 
     private void setPic() {
         // Get the dimensions of the View
+        //TODO: use non static vaules
         int targetW = 160;//mImageView.getWidth();
         int targetH = 120;//mImageView.getHeight();
 

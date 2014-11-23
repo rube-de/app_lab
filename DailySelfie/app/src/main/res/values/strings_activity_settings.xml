@@ -1,0 +1,46 @@
+<resources>
+    <string name="title_activity_settings">Settings</string>
+
+    <!-- Strings related to Settings -->
+
+
+    <!-- Example settings for Notifications -->
+    <string name="pref_header_notifications">Notifications</string>
+
+    <string name="pref_title_reminder_notifications">Reminder notifications</string>
+    <string name="pref_key_reminder_notifications">notifications_reminder</string>
+    <string name="pref_default_reminder_notifications">false</string>
+
+    <!--Not used in this version-->
+    <!--<string name="pref_title_ringtone">Ringtone</string>-->
+    <!--<string name="pref_ringtone_silent">Silent</string>-->
+
+    <!--<string name="pref_title_vibrate">Vibrate</string>-->
+
+    <string name="pref_title_alarm_frequency">Notification frequency</string>
+    <string name="pref_key_alarm_frequency">alarm_frequency</string>
+    <string name="pref_default_alarm_frequency">2</string>
+    <string-array name="pref_alarm_frequency_titles">
+        <item>2 minutes</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>3 hours</item>
+        <item>6 hours</item>
+        <item>12 hours</item>
+        <item>24 hours</item>
+        <item>Never</item>
+    </string-array>
+    <string-array name="pref_alarm_frequency_values">
+        <item>2</item>
+        <item>15</item>
+        <item>30</item>
+        <item>60</item>
+        <item>180</item>
+        <item>360</item>
+        <item>720</item>
+        <item>1440</item>
+        <item>-1</item>
+    </string-array>
+
+</resources>
