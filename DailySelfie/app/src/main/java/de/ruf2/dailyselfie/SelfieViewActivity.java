@@ -17,6 +17,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.FilenameFilter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -25,15 +26,20 @@ public class SelfieViewActivity extends ListActivity {
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final String TAG = "Daily Selfie";
 
+    private static final String JPEG_FILE_SUFFIX = ".jpg";
+
     private SelfieViewAdapter mAdapter;
     private String mCurrentPhotoPath;
     private String STORAGE_PATH = Environment.getExternalStoragePublicDirectory(
             Environment.DIRECTORY_PICTURES) + File.separator + "DailySelfie";
+    private java.io.File mAlbumDir;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mAlbumDir = new File(STORAGE_PATH);
 
 
         final ListView listView = getListView();
@@ -53,7 +59,6 @@ public class SelfieViewActivity extends ListActivity {
         });
 
         mAdapter = new SelfieViewAdapter(getApplicationContext());
-//        mAdapter.addAllViews(new File(STORAGE_PATH));
         setListAdapter(mAdapter);
 
     }
@@ -61,7 +66,8 @@ public class SelfieViewActivity extends ListActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mAdapter.addAllViews(new File(STORAGE_PATH));
+        refreshAdapter();
+//        mAdapter.addAllViews(new File(STORAGE_PATH));
     }
 
 
@@ -106,16 +112,8 @@ public class SelfieViewActivity extends ListActivity {
         // and then add it to the adapter
         if (requestCode == REQUEST_TAKE_PHOTO) {
             if (resultCode == RESULT_OK) {
-                galleryAddPic();
-                File f = new File(mCurrentPhotoPath);
-                Uri contentUri = Uri.fromFile(f);
-                SelfieRecord record = new SelfieRecord(contentUri);
-
-//                Bundle extras = data.getExtras();
-//                Bitmap imageBitmap = (Bitmap) extras.get("data");
-//                mImageView.setImageBitmap(imageBitmap);
-                Log.i(TAG, "add new Selfie");
-                mAdapter.add(record);
+                refreshAdapter();
+//                handleCameraPhoto();
             } else {
                 File f = new File(mCurrentPhotoPath);
                 boolean e = f.exists();
@@ -156,9 +154,9 @@ public class SelfieViewActivity extends ListActivity {
         storageDir.mkdir();
         Log.i(TAG, "storageDir: " + storageDir);
         File image = File.createTempFile(
-                imageFileName,  /* prefix */
-                ".jpg",         /* suffix */
-                storageDir      /* directory */
+                imageFileName,              /* prefix */
+                JPEG_FILE_SUFFIX,         /* suffix */
+                storageDir               /* directory */
         );
 
         // Save a file: path for use with ACTION_VIEW intents
@@ -194,5 +192,51 @@ public class SelfieViewActivity extends ListActivity {
                 })
                 .setIcon(android.R.drawable.ic_delete)
                 .show();
+    }
+
+    private void refreshAdapter()
+    {
+        if (mAlbumDir != null)
+        {
+            //Clean up the adapter
+            mAdapter.removeAllViews();
+
+            File[] files = mAlbumDir.listFiles(new FilenameFilter()
+            {
+                public boolean accept(File dir, String name)
+                {
+                    return (name.toLowerCase().endsWith(JPEG_FILE_SUFFIX));
+                }
+            });
+
+            for (File inFile : files)
+            {
+                mCurrentPhotoPath = inFile.getAbsolutePath();
+                handleCameraPhoto();
+            }
+        }
+    }
+
+    private void handleCameraPhoto()  {
+
+        if (mCurrentPhotoPath != null) {
+            Log.i(TAG, "add new Selfie");
+
+            File f = new File(mCurrentPhotoPath);
+            Uri contentUri = Uri.fromFile(f);
+
+            SelfieRecord newRecord = new SelfieRecord();
+
+			newRecord.setDateTaken(new Date(f.lastModified()).toString());
+            newRecord.setImageFileName(f.getName());
+            newRecord.setImage_File_Path(f.getParent());
+            newRecord.setPictureUri(contentUri);
+            mAdapter.add(newRecord);
+
+            galleryAddPic();
+            mCurrentPhotoPath = null;
+
+        }
+
     }
 }

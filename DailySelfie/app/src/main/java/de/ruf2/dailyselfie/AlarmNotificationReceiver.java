@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.util.Log;
-import android.widget.RemoteViews;
 
 import java.text.DateFormat;
 import java.util.Date;
@@ -52,12 +51,12 @@ public class AlarmNotificationReceiver extends BroadcastReceiver {
                 mNotificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Build the Notification
-      RemoteViews mContentView = new RemoteViews(context.getPackageName(), R.layout.notification);
+//      RemoteViews mContentView = new RemoteViews(context.getPackageName(), R.layout.notification);
 
         // TODO: Set the notification View's text to
         // reflect whether the download completed
         // successfully
-        mContentView.setTextViewText(R.id.text, contentText);
+//        mContentView.setTextViewText(R.id.text, contentText);
 
         Notification.Builder notificationBuilder = new Notification.Builder(context)
                 .setTicker(tickerText)

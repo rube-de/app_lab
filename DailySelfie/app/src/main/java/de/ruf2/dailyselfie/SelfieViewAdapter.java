@@ -3,6 +3,7 @@ package de.ruf2.dailyselfie;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +59,7 @@ public class SelfieViewAdapter extends BaseAdapter {
             holder = new ViewHolder();
             newView = inflater.inflate(R.layout.selfie_list_item, null);
             holder.picture = (ImageView) newView.findViewById(R.id.thumbnail);
-            holder.name = (TextView) newView.findViewById(R.id.picture_name);
+            holder.dateTaken = (TextView) newView.findViewById(R.id.date_taken);
             newView.setTag(holder);
         }else{
             holder = (ViewHolder) newView.getTag();
@@ -67,14 +69,14 @@ public class SelfieViewAdapter extends BaseAdapter {
         mCurrentPhotoPath = curr.getPictureUri().getPath();
         mImageView = holder.picture;
         setPic();
-        holder.name.setText(curr.getPictureUri().getLastPathSegment());
+        holder.dateTaken.setText("Date: " + curr.getDateTaken());
         return newView;
     }
 
     static class ViewHolder {
 
         ImageView picture;
-        TextView name;
+        TextView dateTaken;
     }
 
     public void addAllViews(File storageDirectory){
@@ -89,16 +91,6 @@ public class SelfieViewAdapter extends BaseAdapter {
         }
     }
 
-    private List<SelfieRecord> getRecords(File storageDirectory) {
-        List<SelfieRecord> records = new ArrayList<SelfieRecord>();
-        for(File f : storageDirectory.listFiles()){
-            SelfieRecord rec = new SelfieRecord(f, f.getName());
-            add(rec);
-            records.add(rec);
-        }
-        return records;
-
-    }
 
     public void add(SelfieRecord listItem) {
         list.add(listItem);
@@ -113,8 +105,8 @@ public class SelfieViewAdapter extends BaseAdapter {
     private void setPic() {
         // Get the dimensions of the View
         //TODO: use non static vaules
-        int targetW = 160;//mImageView.getWidth();
-        int targetH = 120;//mImageView.getHeight();
+        int targetW = mImageView.getLayoutParams().width;
+        int targetH = mImageView.getLayoutParams().height;
 
         // Get the dimensions of the bitmap
         BitmapFactory.Options bmOptions = new BitmapFactory.Options();
@@ -124,7 +116,10 @@ public class SelfieViewAdapter extends BaseAdapter {
         int photoH = bmOptions.outHeight;
 
         // Determine how much to scale down the image
-        int scaleFactor = Math.min(photoW/targetW, photoH/targetH);
+        int scaleFactor = 1;
+        if ((targetW > 0) || (targetH > 0)) {
+            scaleFactor = Math.min(photoW / targetW, photoH / targetH);
+        }
 
         // Decode the image file into a Bitmap sized to fill the View
         bmOptions.inJustDecodeBounds = false;
@@ -132,6 +127,28 @@ public class SelfieViewAdapter extends BaseAdapter {
         bmOptions.inPurgeable = true;
 
         Bitmap bitmap = BitmapFactory.decodeFile(mCurrentPhotoPath, bmOptions);
+
         mImageView.setImageBitmap(bitmap);
+
+        //get pic rotation
+        ExifInterface ei = null;
+        try {
+            ei = new ExifInterface(mCurrentPhotoPath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        int orientation = ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+        switch(orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                mImageView.setRotation(90);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                mImageView.setRotation(180);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                mImageView.setRotation((270));
+                break;
+        }
     }
 }
