@@ -16,6 +16,8 @@ import android.preference.PreferenceManager;
  */
 public class SettingsActivity extends PreferenceActivity
         implements Preference.OnPreferenceChangeListener {
+    private boolean mNotifications = false;
+
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,7 +31,7 @@ public class SettingsActivity extends PreferenceActivity
         bindPreferenceSummaryToValue(findPreference(getString(R.string.pref_units_key)));
     }
 
-    /**
+     /**
      * Attaches a listener so the summary is always updated with the preference value.
      * Also fires the listener once, to initialize the summary (so it shows up before the value
      * is changed.)
