@@ -14,7 +14,7 @@ import java.text.DateFormat;
 import java.util.Date;
 
 /**
- * Created by becks on 20.11.2014.
+ * Created by Bernhard Ruf on 20.11.2014.
  */
 
 

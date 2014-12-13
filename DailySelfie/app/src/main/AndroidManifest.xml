@@ -34,6 +34,10 @@
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="de.ruf2.dailyselfie.SelfieViewActivity" />
         </activity>
+
+        <provider
+            android:authorities="de.ruf2.dailyselfie"
+            android:name=".data.SelfieProvider"/>
     </application>
 
 </manifest>

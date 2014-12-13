@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by becks on 19.11.2014.
+ * Created by Bernhard Ruf on 19.11.2014.
  */
 public class SelfieViewAdapter extends BaseAdapter {
 

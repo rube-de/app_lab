@@ -26,28 +26,24 @@ public class SelfieViewActivity extends ListActivity {
     static final int REQUEST_TAKE_PHOTO = 1;
     private static final String TAG = "Daily Selfie";
 
+    private static final String JPEG_FILE_PREFIX = "IMG_";
     private static final String JPEG_FILE_SUFFIX = ".jpg";
+    private String STORAGE_PATH = "DailySelfie";
 
     private SelfieViewAdapter mAdapter;
     private String mCurrentPhotoPath;
-    private String STORAGE_PATH = Environment.getExternalStoragePublicDirectory(
-            Environment.DIRECTORY_PICTURES) + File.separator + "DailySelfie";
     private java.io.File mAlbumDir;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mAlbumDir = new File(STORAGE_PATH);
-
-
+        mAlbumDir = getAlbumDir();
         final ListView listView = getListView();
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Log.i(TAG, "click on list item");
-//                Toast.makeText(getApplicationContext(), "Galleyview not implemented", Toast.LENGTH_LONG).show();
                 Object item = mAdapter.getItem(position);
                 if (item instanceof SelfieRecord) {
                     Intent intent = new Intent();
@@ -60,7 +56,6 @@ public class SelfieViewActivity extends ListActivity {
 
         mAdapter = new SelfieViewAdapter(getApplicationContext());
         setListAdapter(mAdapter);
-
     }
 
     @Override
@@ -149,14 +144,12 @@ public class SelfieViewActivity extends ListActivity {
     private File createImageFile() throws IOException {
         // Create an image file name
         String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-        String imageFileName = "JPEG_" + timeStamp + "_";
-        File storageDir = new File(STORAGE_PATH);
-        storageDir.mkdir();
-        Log.i(TAG, "storageDir: " + storageDir);
+        String imageFileName = JPEG_FILE_PREFIX + timeStamp + "_";
+        Log.i(TAG, "storageDir: " + mAlbumDir);
         File image = File.createTempFile(
                 imageFileName,              /* prefix */
                 JPEG_FILE_SUFFIX,         /* suffix */
-                storageDir               /* directory */
+                mAlbumDir               /* directory */
         );
 
         // Save a file: path for use with ACTION_VIEW intents
@@ -178,11 +171,11 @@ public class SelfieViewActivity extends ListActivity {
                 .setMessage(R.string.delete_msg)
                 .setPositiveButton(R.string.action_delete, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        File dir = new File(STORAGE_PATH);
+                        File dir = mAlbumDir;
                         for (File file : dir.listFiles()) {
                             file.delete();
                         }
-                        mAdapter.addAllViews(new File(STORAGE_PATH));
+                        refreshAdapter();
                     }
                 })
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -194,40 +187,33 @@ public class SelfieViewActivity extends ListActivity {
                 .show();
     }
 
-    private void refreshAdapter()
-    {
-        if (mAlbumDir != null)
-        {
+    private void refreshAdapter() {
+        if (mAlbumDir != null) {
             //Clean up the adapter
             mAdapter.removeAllViews();
 
-            File[] files = mAlbumDir.listFiles(new FilenameFilter()
-            {
-                public boolean accept(File dir, String name)
-                {
+            File[] files = mAlbumDir.listFiles(new FilenameFilter() {
+                public boolean accept(File dir, String name) {
                     return (name.toLowerCase().endsWith(JPEG_FILE_SUFFIX));
                 }
             });
 
-            for (File inFile : files)
-            {
+            for (File inFile : files) {
                 mCurrentPhotoPath = inFile.getAbsolutePath();
                 handleCameraPhoto();
             }
         }
     }
 
-    private void handleCameraPhoto()  {
-
+    private void handleCameraPhoto() {
         if (mCurrentPhotoPath != null) {
             Log.i(TAG, "add new Selfie");
-
             File f = new File(mCurrentPhotoPath);
             Uri contentUri = Uri.fromFile(f);
 
             SelfieRecord newRecord = new SelfieRecord();
 
-			newRecord.setDateTaken(new Date(f.lastModified()).toString());
+            newRecord.setDateTaken(new Date(f.lastModified()).toString());
             newRecord.setImageFileName(f.getName());
             newRecord.setImage_File_Path(f.getParent());
             newRecord.setPictureUri(contentUri);
@@ -235,8 +221,29 @@ public class SelfieViewActivity extends ListActivity {
 
             galleryAddPic();
             mCurrentPhotoPath = null;
-
         }
+    }
 
+    private File getAlbumDir() {
+        File storageDir = null;
+        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())) {
+            storageDir = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES), getAlbumName());
+            if (storageDir != null) {
+                if (!storageDir.mkdirs()) {
+                    if (!storageDir.exists()) {
+                        Log.d(TAG, "failed to create directory");
+                        return null;
+                    }
+                }
+            }
+        } else {
+            Log.v(TAG, "External storage is not mounted READ/WRITE.");
+        }
+        return storageDir;
+    }
+
+    /* Photo album for this application */
+    private String getAlbumName() {
+        return STORAGE_PATH;
     }
 }

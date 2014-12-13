@@ -5,7 +5,7 @@ import android.net.Uri;
 import java.io.File;
 
 /**
- * Created by becks on 19.11.2014.
+ * Created by Bernhard Ruf on 19.11.2014.
  */
 public class SelfieRecord {
 
