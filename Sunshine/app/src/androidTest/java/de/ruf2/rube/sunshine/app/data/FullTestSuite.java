@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.ruf2.rube.sunshine.app;
+package de.ruf2.rube.sunshine.app.data;
 
 import android.test.suitebuilder.TestSuiteBuilder;
 

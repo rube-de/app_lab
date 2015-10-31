@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package de.ruf2.rube.sunshine.app;
+package de.ruf2.rube.sunshine.app.data;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -26,11 +26,10 @@ import java.util.Set;
 
 import de.ruf2.rube.sunshine.app.data.WeatherContract.LocationEntry;
 import de.ruf2.rube.sunshine.app.data.WeatherContract.WeatherEntry;
-import de.ruf2.rube.sunshine.app.data.WeatherDbHelper;
 
-public class TestDb extends AndroidTestCase {
+public class TestDb_old extends AndroidTestCase {
 
-    public static final String LOG_TAG = TestDb.class.getSimpleName();
+    public static final String LOG_TAG = TestDb_old.class.getSimpleName();
 
     public void testCreateDb() throws Throwable {
         mContext.deleteDatabase(WeatherDbHelper.DATABASE_NAME);
@@ -96,7 +95,7 @@ public class TestDb extends AndroidTestCase {
     static ContentValues createWeatherValues(long locationRowId) {
         ContentValues weatherValues = new ContentValues();
         weatherValues.put(WeatherEntry.COLUMN_LOC_KEY, locationRowId);
-        weatherValues.put(WeatherEntry.COLUMN_DATETEXT, "20141205");
+//        weatherValues.put(WeatherEntry.COLUMN_DATETEXT, "20141205");
         weatherValues.put(WeatherEntry.COLUMN_DEGREES, 1.1);
         weatherValues.put(WeatherEntry.COLUMN_HUMIDITY, 1.2);
         weatherValues.put(WeatherEntry.COLUMN_PRESSURE, 1.3);
