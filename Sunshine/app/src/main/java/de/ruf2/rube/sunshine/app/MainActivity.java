@@ -9,7 +9,7 @@ import android.view.MenuItem;
 import de.ruf2.rube.sunshine.app.logging.LifecycleLoggingActionBarActivity;
 
 
-public class MainActivity extends LifecycleLoggingActionBarActivity{
+public class MainActivity extends LifecycleLoggingActionBarActivity implements ForeCastFragment.Callback {
     private String mLocation;
     private boolean mTwoPane = false;
     private static final String DETAILFRAGMENT_TAG = "DFTAG";
@@ -35,7 +35,11 @@ public class MainActivity extends LifecycleLoggingActionBarActivity{
             }
         } else {
             mTwoPane = false;
+            getSupportActionBar().setElevation(0f);
         }
+        ForeCastFragment forecastFragment =  ((ForeCastFragment)getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_forecast));
+        forecastFragment.setUseTodayLayout(!mTwoPane);
     }
 
 
@@ -52,9 +56,9 @@ public class MainActivity extends LifecycleLoggingActionBarActivity{
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        switch (id)  {
+        switch (id) {
             case R.id.action_settings:
-                Intent settings = new Intent (MainActivity.this, SettingsActivity.class);
+                Intent settings = new Intent(MainActivity.this, SettingsActivity.class);
                 startActivity(settings);
                 return true;
             case R.id.action_map:
@@ -64,13 +68,44 @@ public class MainActivity extends LifecycleLoggingActionBarActivity{
         }
     }
 
+
     @Override
-    public void onResume() {
+    protected void onResume() {
         super.onResume();
-        ForeCastFragment ff = (ForeCastFragment)getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
-        if (mLocation.equals(Utility.getPreferredLocation(this))) {
-            ff.onLocationChanged();
-            mLocation = Utility.getPreferredLocation(this);
+        String location = Utility.getPreferredLocation(this);
+        // update the location in our second pane using the fragment manager
+        if (location != null && !location.equals(mLocation)) {
+            ForeCastFragment ff = (ForeCastFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+            if (null != ff) {
+                ff.onLocationChanged();
+            }
+            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (null != df) {
+                df.onLocationChanged(location);
+            }
+            mLocation = location;
+        }
+    }
+
+    @Override
+    public void onItemSelected(Uri contentUri) {
+        if (mTwoPane) {
+            // In two-pane mode, show the detail view in this activity by
+            // adding or replacing the detail fragment using a
+            // fragment transaction.
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_URI, contentUri);
+
+            DetailFragment fragment = new DetailFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class)
+                    .setData(contentUri);
+            startActivity(intent);
         }
     }
 
@@ -88,9 +123,6 @@ public class MainActivity extends LifecycleLoggingActionBarActivity{
             startActivity(intent);
         }
     }
-
-
-
 
 
 }
